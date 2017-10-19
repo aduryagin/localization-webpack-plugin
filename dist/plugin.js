@@ -1,8 +1,28 @@
-import fs from 'fs';
-import crypto from 'crypto';
-import merge from 'merge';
-import { RawSource } from 'webpack-sources';
-import Template from 'webpack/lib/Template';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _fs = require('fs');
+
+var _fs2 = _interopRequireDefault(_fs);
+
+var _crypto = require('crypto');
+
+var _crypto2 = _interopRequireDefault(_crypto);
+
+var _merge = require('merge');
+
+var _merge2 = _interopRequireDefault(_merge);
+
+var _webpackSources = require('webpack-sources');
+
+var _Template = require('webpack/lib/Template');
+
+var _Template2 = _interopRequireDefault(_Template);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 class LocalizationWebpackPlugin {
   constructor(options) {
@@ -36,15 +56,15 @@ class LocalizationWebpackPlugin {
   }
 
   apply(compiler) {
-    compiler.plugin('compilation', (compilation) => {
-      compilation.plugin('additional-assets', (callback) => {
-        compilation.chunks.forEach((chunk) => {
+    compiler.plugin('compilation', compilation => {
+      compilation.plugin('additional-assets', callback => {
+        compilation.chunks.forEach(chunk => {
           const grouppedLangs = {};
 
-          chunk.forEachModule((module) => {
+          chunk.forEachModule(module => {
             if (String(module.resource).match(new RegExp(`(${this.options.locales.join('|')}).json`))) {
-              module.fileDependencies.forEach((filepath) => {
-                this.options.locales.forEach((locale) => {
+              module.fileDependencies.forEach(filepath => {
+                this.options.locales.forEach(locale => {
                   if (String(filepath).match(new RegExp(`${locale}.json`))) {
                     if (Array.isArray(grouppedLangs[locale])) {
                       grouppedLangs[locale].push(filepath);
@@ -57,17 +77,14 @@ class LocalizationWebpackPlugin {
             }
           });
 
-          this.options.locales.forEach((locale) => {
+          this.options.locales.forEach(locale => {
             if (grouppedLangs[locale]) {
               let allMergedLocalesOfSubmodule = {};
 
-              grouppedLangs[locale].forEach((pathToLocale) => {
+              grouppedLangs[locale].forEach(pathToLocale => {
                 try {
-                  const data = fs.readFileSync(pathToLocale, 'utf8');
-                  allMergedLocalesOfSubmodule = merge.recursive(
-                    allMergedLocalesOfSubmodule,
-                    JSON.parse(data),
-                  );
+                  const data = _fs2.default.readFileSync(pathToLocale, 'utf8');
+                  allMergedLocalesOfSubmodule = _merge2.default.recursive(allMergedLocalesOfSubmodule, JSON.parse(data));
                 } catch (error) {
                   callback(new Error(`[localization-webpack-plugin] JSON.parse error! File: ${pathToLocale}`));
                 }
@@ -75,26 +92,20 @@ class LocalizationWebpackPlugin {
 
               allMergedLocalesOfSubmodule = JSON.stringify(allMergedLocalesOfSubmodule);
 
-              const localeFileName =
-                this.options.filename
-                  .replace('[chunkname]', chunk.name || chunk.id)
-                  .replace('[lang]', locale)
-                  .replace('[hash]', crypto.createHash('md5').update(chunk.name || chunk.id).digest('hex').substr(-5));
+              const localeFileName = this.options.filename.replace('[chunkname]', chunk.name || chunk.id).replace('[lang]', locale).replace('[hash]', _crypto2.default.createHash('md5').update(chunk.name || chunk.id).digest('hex').substr(-5));
 
               compilation.assets[localeFileName] = {
                 source: () => allMergedLocalesOfSubmodule,
-                size: () => allMergedLocalesOfSubmodule.length,
+                size: () => allMergedLocalesOfSubmodule.length
               };
 
-              const localeExist = this.localesAssets.find(localeAsset =>
-                (localeAsset.chunkName === Template.toPath(chunk.name)) &&
-                localeAsset.locale === locale);
+              const localeExist = this.localesAssets.find(localeAsset => localeAsset.chunkName === _Template2.default.toPath(chunk.name) && localeAsset.locale === locale);
 
               if (!localeExist) {
                 this.localesAssets.push({
                   chunkName: chunk.name,
                   locale,
-                  localeFileName,
+                  localeFileName
                 });
               }
             }
@@ -107,17 +118,17 @@ class LocalizationWebpackPlugin {
       compilation.plugin('optimize-chunk-assets', (chunks, callback) => {
         const files = [];
 
-        chunks.forEach((chunk) => {
-          chunk.files.forEach((file) => {
+        chunks.forEach(chunk => {
+          chunk.files.forEach(file => {
             files.push(file);
           });
         });
 
-        compilation.additionalChunkAssets.forEach((file) => {
+        compilation.additionalChunkAssets.forEach(file => {
           files.push(file);
         });
 
-        files.forEach((file) => {
+        files.forEach(file => {
           const asset = compilation.assets[file];
 
           let sourceCode;
@@ -133,13 +144,10 @@ class LocalizationWebpackPlugin {
           const arrayForReplace = sourceCode.match(regExp);
 
           if (Array.isArray(arrayForReplace)) {
-            arrayForReplace.forEach((template) => {
+            arrayForReplace.forEach(template => {
               const JSONFromTemplate = JSON.parse(template.replace('chunkLocalizationURL: ', ''));
 
-              const chunkLocaleAsset =
-                this.localesAssets.find(localeAsset =>
-                  (localeAsset.chunkName === Template.toPath(JSONFromTemplate.chunkName)) &&
-                  localeAsset.locale === JSONFromTemplate.lang);
+              const chunkLocaleAsset = this.localesAssets.find(localeAsset => localeAsset.chunkName === _Template2.default.toPath(JSONFromTemplate.chunkName) && localeAsset.locale === JSONFromTemplate.lang);
 
               if (chunkLocaleAsset) {
                 sourceCode = sourceCode.replace(template, chunkLocaleAsset.localeFileName);
@@ -147,7 +155,7 @@ class LocalizationWebpackPlugin {
             });
           }
 
-          compilation.assets[file] = new RawSource(sourceCode);
+          compilation.assets[file] = new _webpackSources.RawSource(sourceCode);
         });
 
         callback();
@@ -156,4 +164,4 @@ class LocalizationWebpackPlugin {
   }
 }
 
-export default LocalizationWebpackPlugin;
+exports.default = LocalizationWebpackPlugin;
