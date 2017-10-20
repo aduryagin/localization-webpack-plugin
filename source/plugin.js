@@ -83,7 +83,7 @@ class LocalizationWebpackPlugin {
 
               compilation.assets[localeFileName] = {
                 source: () => allMergedLocalesOfSubmodule,
-                size: () => allMergedLocalesOfSubmodule.length,
+                size: () => allMergedLocalesOfSubmodule.length
               };
 
               const localeExist = this.localesAssets.find(localeAsset =>
@@ -94,7 +94,7 @@ class LocalizationWebpackPlugin {
                 this.localesAssets.push({
                   chunkName: chunk.name,
                   locale,
-                  localeFileName,
+                  localeFileName
                 });
               }
             }

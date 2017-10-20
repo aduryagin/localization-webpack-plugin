@@ -3,7 +3,7 @@ Make separate JSON localization files for every chunk
 
 ## Usage
 This plugin creates separated JSON files with translations.
-[See demo](demo)
+[See demo](https://github.com/aiduryagin/localization-webpack-plugin-demo)
 
 ## Options
 ```javascript

@@ -1,19 +1,15 @@
 {
   "parser": "babel-eslint",
   "extends": [
-    "airbnb",
+    "airbnb-base/legacy",
     "plugin:flowtype/recommended"
   ],
   "plugins": [
     "flowtype"
   ],
   "rules": {
-    "react/jsx-filename-extension": "off",
-    "import/no-extraneous-dependencies": "off",
-    "class-methods-use-this": "off",
     "no-param-reassign": "off",
-    "no-underscore-dangle": "off",
-    "react/forbid-prop-types": "off"
+    "class-methods-use-this": "off"
   },
   "env": {
     "browser": true,
