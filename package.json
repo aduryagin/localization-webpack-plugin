@@ -1,6 +1,6 @@
 {
   "name": "localization-webpack-plugin",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Localization webpack plugin. Create separate JSON files for every chunk.",
   "author": "Alexey Duryagin",
   "license": "MIT",

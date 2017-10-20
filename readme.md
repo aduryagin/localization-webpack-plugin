@@ -1,9 +1,20 @@
 # LocalizationWebpackPlugin
 Make separate JSON localization files for every chunk
 
+* [See demo](https://warm-savannah-71686.herokuapp.com/)
+* [See source of demo](https://github.com/aiduryagin/localization-webpack-plugin-demo)
+
 ## Usage
-This plugin creates separated JSON files with translations.
-[See demo](https://github.com/aiduryagin/localization-webpack-plugin-demo)
+This plugin creates merged JSON files with translations for cunks. One JSON file by one chunk.
+To get link to JSON file with translations you need to write in code 
+
+```javascript
+// 'chunkLocalizationURL: {"chunkName": "warAndPeace", "lang": "en"}' will be replaced by 'warAndPeace.en.json'
+const linksToTranslationFiles = {
+  warAndPeaceEN: 'chunkLocalizationURL: {"chunkName": "warAndPeace", "lang": "en"}',
+  warAndPeaceRU: 'chunkLocalizationURL: {"chunkName": "warAndPeace", "lang": "ru"}'
+};
+```
 
 ## Options
 ```javascript
