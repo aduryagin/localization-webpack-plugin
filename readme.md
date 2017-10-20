@@ -27,4 +27,4 @@ plugins: [
 ],
 ```
 * `filename`: the default value is `[chunkname].[lang].json` Avaible tags is `[chunkname], [hash], [lang]`
-* `locales`: the default value is `['en', 'ru']`
+* `locales`: the default value is `['en']`
