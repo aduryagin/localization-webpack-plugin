@@ -1,23 +1,32 @@
+// @flow
+
 import fs from 'fs';
 import crypto from 'crypto';
 import merge from 'merge';
 import { RawSource } from 'webpack-sources';
 import Template from 'webpack/lib/Template';
 
+type pluginOptions = { locales: [string], filename: string };
+type localeAsset = { chunkName: string, locale: string, localeFileName: string };
+
 class LocalizationWebpackPlugin {
-  constructor(options) {
+  options: pluginOptions;
+  localesAssets: Array<localeAsset>;
+
+  constructor(options: pluginOptions): void {
     this.options = this.normalizeOptions(options);
     this.localesAssets = [];
   }
 
-  normalizeOptions(options) {
-    const defaultLocales = ['en'];
-    const defaultFilename = '[chunkname].[lang].json';
+  normalizeOptions(options: pluginOptions): pluginOptions {
+    const defaultLocales: [string] = ['en'];
+    const defaultFilename: string = '[chunkname].[lang].json';
 
-    if (!options || options.length === 0) {
-      options = {};
-      options.locales = defaultLocales;
-      options.filename = defaultFilename;
+    if (!options || typeof options !== 'object' || Object.keys(options).length === 0) {
+      options = {
+        locales: defaultLocales,
+        filename: defaultFilename
+      };
     }
 
     if (!options.locales) {
@@ -35,11 +44,11 @@ class LocalizationWebpackPlugin {
     return require.resolve('./replaceJSONByRandomNumberLoader');
   }
 
-  apply(compiler) {
+  apply(compiler: { plugin: Function }) {
     compiler.plugin('compilation', (compilation) => {
       compilation.plugin('additional-assets', (callback) => {
         compilation.chunks.forEach((chunk) => {
-          const grouppedLangs = {};
+          let grouppedLangs: { [locale: string]: Array<string> } = {};
 
           chunk.forEachModule((module) => {
             if (String(module.resource).match(new RegExp(`(${this.options.locales.join('|')}).json`))) {
@@ -59,7 +68,7 @@ class LocalizationWebpackPlugin {
 
           this.options.locales.forEach((locale) => {
             if (grouppedLangs[locale]) {
-              let allMergedLocalesOfSubmodule = {};
+              let allMergedLocalesOfSubmodule: Object | string = {};
 
               grouppedLangs[locale].forEach((pathToLocale) => {
                 try {
@@ -75,7 +84,7 @@ class LocalizationWebpackPlugin {
 
               allMergedLocalesOfSubmodule = JSON.stringify(allMergedLocalesOfSubmodule);
 
-              const localeFileName =
+              const localeFileName: string =
                 this.options.filename
                   .replace('[chunkname]', chunk.name || chunk.id)
                   .replace('[lang]', locale)
@@ -86,9 +95,9 @@ class LocalizationWebpackPlugin {
                 size: () => allMergedLocalesOfSubmodule.length
               };
 
-              const localeExist = this.localesAssets.find(localeAsset =>
-                (localeAsset.chunkName === Template.toPath(chunk.name)) &&
-                localeAsset.locale === locale);
+              const localeExist: ?localeAsset = this.localesAssets.find(asset =>
+                (asset.chunkName === Template.toPath(chunk.name)) &&
+                asset.locale === locale);
 
               if (!localeExist) {
                 this.localesAssets.push({
@@ -105,7 +114,7 @@ class LocalizationWebpackPlugin {
       });
 
       compilation.plugin('optimize-chunk-assets', (chunks, callback) => {
-        const files = [];
+        const files: Array<string> = [];
 
         chunks.forEach((chunk) => {
           chunk.files.forEach((file) => {
@@ -120,7 +129,7 @@ class LocalizationWebpackPlugin {
         files.forEach((file) => {
           const asset = compilation.assets[file];
 
-          let sourceCode;
+          let sourceCode: string;
 
           if (asset.sourceAndMap) {
             const sourceAndMap = asset.sourceAndMap();
@@ -129,17 +138,18 @@ class LocalizationWebpackPlugin {
             sourceCode = asset.source();
           }
 
-          const regExp = /chunkLocalizationURL: {"chunkName": ".*", "lang": ".*"}/gi;
-          const arrayForReplace = sourceCode.match(regExp);
+          const regExp: RegExp = /chunkLocalizationURL: {"chunkName": ".*", "lang": ".*"}/gi;
+          const arrayForReplace: Array<string> = sourceCode.match(regExp);
 
           if (Array.isArray(arrayForReplace)) {
             arrayForReplace.forEach((template) => {
-              const JSONFromTemplate = JSON.parse(template.replace('chunkLocalizationURL: ', ''));
+              const JSONFromTemplate: Object = JSON.parse(template.replace('chunkLocalizationURL: ', ''));
 
-              const chunkLocaleAsset =
-                this.localesAssets.find(localeAsset =>
-                  (localeAsset.chunkName === Template.toPath(JSONFromTemplate.chunkName)) &&
-                  localeAsset.locale === JSONFromTemplate.lang);
+              const chunkLocaleAsset: ?localeAsset =
+                this.localesAssets.find(chunkLocalizationAsset =>
+                  (
+                    chunkLocalizationAsset.chunkName === Template.toPath(JSONFromTemplate.chunkName)
+                  ) && chunkLocalizationAsset.locale === JSONFromTemplate.lang);
 
               if (chunkLocaleAsset) {
                 sourceCode = sourceCode.replace(template, chunkLocaleAsset.localeFileName);

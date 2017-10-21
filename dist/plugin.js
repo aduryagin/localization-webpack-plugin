@@ -25,6 +25,7 @@ var _Template2 = _interopRequireDefault(_Template);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 class LocalizationWebpackPlugin {
+
   constructor(options) {
     this.options = this.normalizeOptions(options);
     this.localesAssets = [];
@@ -34,10 +35,11 @@ class LocalizationWebpackPlugin {
     const defaultLocales = ['en'];
     const defaultFilename = '[chunkname].[lang].json';
 
-    if (!options || options.length === 0) {
-      options = {};
-      options.locales = defaultLocales;
-      options.filename = defaultFilename;
+    if (!options || typeof options !== 'object' || Object.keys(options).length === 0) {
+      options = {
+        locales: defaultLocales,
+        filename: defaultFilename
+      };
     }
 
     if (!options.locales) {
@@ -59,7 +61,7 @@ class LocalizationWebpackPlugin {
     compiler.plugin('compilation', compilation => {
       compilation.plugin('additional-assets', callback => {
         compilation.chunks.forEach(chunk => {
-          const grouppedLangs = {};
+          let grouppedLangs = {};
 
           chunk.forEachModule(module => {
             if (String(module.resource).match(new RegExp(`(${this.options.locales.join('|')}).json`))) {
@@ -99,7 +101,7 @@ class LocalizationWebpackPlugin {
                 size: () => allMergedLocalesOfSubmodule.length
               };
 
-              const localeExist = this.localesAssets.find(localeAsset => localeAsset.chunkName === _Template2.default.toPath(chunk.name) && localeAsset.locale === locale);
+              const localeExist = this.localesAssets.find(asset => asset.chunkName === _Template2.default.toPath(chunk.name) && asset.locale === locale);
 
               if (!localeExist) {
                 this.localesAssets.push({
@@ -147,7 +149,7 @@ class LocalizationWebpackPlugin {
             arrayForReplace.forEach(template => {
               const JSONFromTemplate = JSON.parse(template.replace('chunkLocalizationURL: ', ''));
 
-              const chunkLocaleAsset = this.localesAssets.find(localeAsset => localeAsset.chunkName === _Template2.default.toPath(JSONFromTemplate.chunkName) && localeAsset.locale === JSONFromTemplate.lang);
+              const chunkLocaleAsset = this.localesAssets.find(chunkLocalizationAsset => chunkLocalizationAsset.chunkName === _Template2.default.toPath(JSONFromTemplate.chunkName) && chunkLocalizationAsset.locale === JSONFromTemplate.lang);
 
               if (chunkLocaleAsset) {
                 sourceCode = sourceCode.replace(template, chunkLocaleAsset.localeFileName);
