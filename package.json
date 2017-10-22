@@ -1,6 +1,6 @@
 {
   "name": "localization-webpack-plugin",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Localization webpack plugin. Create separate JSON files for every chunk.",
   "author": "Alexey Duryagin",
   "license": "MIT",
@@ -12,6 +12,12 @@
     "type" : "git",
     "url" : "https://github.com/aiduryagin/localization-webpack-plugin.git"
   },
+  "keywords": [
+    "webpack",
+    "i18n",
+    "localization",
+    "plugin"
+  ],
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "7",
