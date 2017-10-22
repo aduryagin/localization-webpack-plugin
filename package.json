@@ -5,6 +5,13 @@
   "author": "Alexey Duryagin",
   "license": "MIT",
   "main": "dist/plugin.js",
+  "bugs": {
+    "url" : "https://github.com/aiduryagin/localization-webpack-plugin/issues"
+  },
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/aiduryagin/localization-webpack-plugin.git"
+  },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "7",
